@@ -1,0 +1,16 @@
+sSrcFolder .
+sDestFolder Testing
+sTrialName BasicTest
+sSampleMode random
+iNumTrials 2
+
+sBodyFile testplanet.in
+
+dMass [-1.374, 0.069, g, max0] b_mass
+dRadius [-1.116, 0.013, g, max0] b_radius
+dEcc [0.0030547, 0.00412, g, min0, max1] b_ecc
+dOrbPeriod [-1.510826, 0.000006, g, max0] b_orbper
+
+sBodyFile star.in
+
+sPrimaryFile vpl.in

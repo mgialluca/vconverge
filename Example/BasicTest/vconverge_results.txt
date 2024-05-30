@@ -1,0 +1,23 @@
+
+----- Step 1 -----
+
+KS Statistics:
+planet,SurfWaterMass,final ----- 0.0
+planet,OxygenMass,final ----- 0.25
+
+Converged = False
+
+----- Step 2 -----
+
+KS Statistics:
+planet,SurfWaterMass,final ----- 0.0
+planet,OxygenMass,final ----- 0.16666666666666666
+
+Converged = False
+
+-------------- VCONVERGE STATS ----------------
+
+Number of Steps Taken: 2
+Total Number of Simulations Ran: 6
+Max Steps Reached. 0 Consecutive Convergences Achieved
+Total Number of Convergences during vconverge run: 0

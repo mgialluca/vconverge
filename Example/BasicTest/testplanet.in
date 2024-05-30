@@ -1,0 +1,23 @@
+# Planet parameters (modeled after TRAPPIST-1b)
+sName                     planet              # Body's name
+saModules                 atmesc         # Modules to apply, exact spelling required
+
+# Physical Properties (from Agol et al. [2021])
+dMass                     -1.017           # Mass, negative -> Earth masses
+dRadius                   -1.121           # Radius, negative -> Earth radii
+
+# AtmEsc Properties
+dXFrac                    1.0
+dSurfWaterMass            -20
+dEnvelopeMass             0.0
+sWaterLossModel           ls16
+bInstantO2Sink            0
+sAtmXAbsEffH2OModel       bolmont16
+dJeansTime                -10
+
+# Orbital Properties
+dEcc                       0.0062         # Eccentricity
+dOrbPeriod                 -1.5
+
+
+saOutputOrder Time -SurfWaterMass -OxygenMass

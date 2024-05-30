@@ -1,0 +1,11 @@
+sVspaceFile ./testvspace.in
+iStepSize 2
+iMaxSteps 2
+sConvergenceMethod KS_statistic
+fConvergenceCondition 0.004
+iNumberOfConvergences 3
+
+sObjectFile testplanet.in
+
+saConverge final SurfWaterMass
+saConverge final OxygenMass

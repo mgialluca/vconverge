@@ -11,6 +11,7 @@ import copy
 from scipy.stats import ks_2samp  
 from scipy.special import kl_div
 #import matplotlib.pyplot as plt
+#import vspace
 
 # Parameter sweep until user defined params converge
 
@@ -78,7 +79,7 @@ def extract_info_vsp(vspFile): # Extracts relevant info from vspace.in file for 
 			else:
 				raise IOError('vconverge is currently only compatible with random mode')
 		#elif linesog[i].split()[0] == 'randsize': # Old Syntax, before backwards compatibility break
-		elif linesog[i].split()[0] == 'iRandSize': 
+		elif linesog[i].split()[0] == 'iNumTrials': 
 			initial_sim_size = int(linesog[i].split()[1])
 		#elif linesog[i].split()[0] == 'trialname': # Old Syntax, before backwards compatibility break
 		elif linesog[i].split()[0] == 'sTrialName': 
@@ -97,19 +98,20 @@ def create_tmp_vspin(vspFile, RunIndex, stepsize): # Creates a temporary vspace.
 	vspog = open(vspFile, 'r') # Read in original (og) vspace file provided as input by user
 	linesog = vspog.readlines()
 	vspog.close()
+	predefpriors_used = False
 	vsptmp = open('vconverge_tmp/vspace_tmp.in', 'w') # Create new temp vspace file in vconverge tmp directory
 	for i in range(len(linesog)):
 		if linesog[i].split() == []:
 			pass
 		#elif linesog[i].split()[0] == 'destfolder': # Old Syntax, before backwards compatibility break
 		elif linesog[i].split()[0] == 'sDestFolder': # Destination folder needs to be in vconverge_tmp, unique runs will be copied into OG destfolder
-			vsptmp.write('destfolder vconverge_tmp/Step_'+str(RunIndex)+'\n')
+			vsptmp.write('sDestFolder vconverge_tmp/Step_'+str(RunIndex)+'\n')
 		#elif linesog[i].split()[0] == 'trialname': # Old Syntax, before backwards compatibility break
 		elif linesog[i].split()[0] == 'sTrialName': # Trial name must be unique to not overwrite any data during copy
-			vsptmp.write('trialname Step'+str(RunIndex)+'_'+linesog[i].split()[1]+'\n')
+			vsptmp.write('sTrialName Step'+str(RunIndex)+'_'+linesog[i].split()[1]+'\n')
 		#elif linesog[i].split()[0] == 'randsize': # Old Syntax, before backwards compatibility break
-		elif linesog[i].split()[0] == 'iRandSize': 
-			vsptmp.write('randsize '+str(stepsize)+'\n')
+		elif linesog[i].split()[0] == 'iNumTrials': 
+			vsptmp.write('iNumTrials '+str(stepsize)+'\n')
 		elif re.search("\[", linesog[i]) != None: # look for predefined prior files, change to tmp name
 			spl = re.split("[\[\]]", linesog[i])
 			var = spl[0].strip() # Current variable
@@ -117,6 +119,7 @@ def create_tmp_vspin(vspFile, RunIndex, stepsize): # Creates a temporary vspace.
 			for j in range(len(values)):
 				values[j] = values[j].strip()
 			if values[2][0] == 'p':
+				predefpriors_used = True
 				priorhold = values[0].split('/')
 				tmpprior = priorhold[len(priorhold)-1]
 				tmpprior = 'tmp_'+tmpprior
@@ -126,6 +129,7 @@ def create_tmp_vspin(vspFile, RunIndex, stepsize): # Creates a temporary vspace.
 		else:
 			vsptmp.write(linesog[i]+'\n')
 	vsptmp.close()
+	return predefpriors_used
 
 
 def create_tmp_prior_files(RunIndex, og_triname, dst_fold): # Create new prior files deleting previously used priors
@@ -217,11 +221,13 @@ def vconverge(vcnvFile):
 	#Run Vspace on OG
 	os.system('python -m vspace '+str(vspFile))
 	#os.system('multi-planet '+str(vspFile))
+	#vspace vspFile
 	os.system('python -m multiplanet '+str(vspFile))
 	#Run Multi-planet on OG
 	RunIndex = 1
-	create_tmp_vspin(vspFile, RunIndex, StepSize) # Make the temporary vspace file
-	create_tmp_prior_files(RunIndex, og_triname, dst_fold) # Make the temporary prior files
+	predefpriors_used = create_tmp_vspin(vspFile, RunIndex, StepSize) # Make the temporary vspace file
+	if predefpriors_used == True:
+		create_tmp_prior_files(RunIndex, og_triname, dst_fold) # Make the temporary prior files
 
 	# go through initial set and extract the values of the converging parameters for all sims
 	body = []
@@ -384,8 +390,9 @@ def vconverge(vcnvFile):
 		RunIndex = RunIndex + 1
 
 		# Create new vspace.in and prior files
-		create_tmp_vspin(vspFile, RunIndex, StepSize) # Make the temporary vspace file
-		create_tmp_prior_files(RunIndex, og_triname, 'vconverge_tmp') # Make the temporary prior files
+		predefpriors_used = create_tmp_vspin(vspFile, RunIndex, StepSize) # Make the temporary vspace file
+		if predefpriors_used == True:
+			create_tmp_prior_files(RunIndex, og_triname, 'vconverge_tmp') # Make the temporary prior files
 
 	if RunIndex >= MaxSteps:
 		print('MaxSteps reached')
